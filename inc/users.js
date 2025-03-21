@@ -26,13 +26,18 @@ module.exports = {
                     } else {
 
                         if (!results.length === 0 ){
+                            console.log("NÃO TEM USER")
                             reject("Usuarios ou senha incorretos")
                         } else {
                            
                             let row = results[0]
 
+                            console.log('EMAIL', email)
+                            console.log('password', password)
+                            console.log('RESULTS', results)
 
-                            if (row.password !== password){
+                            if (row.password !== password[0]){
+                                console.log("SENHA INCORRETA")
                                 reject("Usuarios ou senha incorretos")
                             } else {
                                 resolve(row)
