@@ -13,33 +13,33 @@ var adminRouter = require('./routes/admin'); //aqui
 
 var app = express();
 
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
+  req.body = {};
+
   if (req.method === "POST") {
-  
-    var form = new formidable.IncomingForm({
-      uploadDir: path.join(__dirname, "/public/images"), 
-      keepExtensions: true 
+    const form = new formidable.IncomingForm({
+      uploadDir: path.join(__dirname, "/public/images"),
+      keepExtensions: true, 
+      allowEmptyFiles: true,
+      minFileSize: 0,
     });
 
-    
-    form.parse(req, function(err, fields, files) {
+    form.parse(req, (err, fields, files) => {
       if (err) {
-        
-        return res.status(500).json({ error: 'Erro ao processar o formulário', details: err });
+        console.error("Erro ao processar o formulário:", err);
+        return res.status(500).json({ error: "Erro ao processar o formulário", details: err });
       }
 
-    
+      req.body = fields;
       req.fields = fields;
       req.files = files;
 
       next();
     });
   } else {
-    
     next();
   }
 });
-
   
 
 // view engine setup
@@ -58,7 +58,7 @@ app.use(session({
 
 app.use(logger('dev'));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+//app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
