@@ -147,35 +147,70 @@
 
  <script>
 
-  new hcodeFileReader("#modal-create [type=file]","#modal-create img");
-  new hcodeFileReader("#modal-update [type=file]","#modal-update img");
+   new hcodeFileReader("#modal-create [type=file]","#modal-create img");
+   new hcodeFileReader("#modal-update [type=file]","#modal-update img");
 
 let formCreate = document.querySelector("#modal-create form");
-let formCreateData = new FormData(formCreate)
 
-console.log("formCreate:", formCreateData);
+formCreate.save().then(json =>{
 
-formCreate.addEventListener("submit", e => {
-  console.log("Formulário enviado");
+  window.location.reload()
 
-e.preventDefault()
+}).catch(err =>{
 
-let formCreateData = new FormData(formCreate)
+  console.log(err)
 
-fetch("/admin/menus", {
-  method: "POST",
-  body: formCreateData
 })
-.then(response => response.json())
-.then(json => {
-  console.log("Resposta do servidor:", json);
-  alert("Menu salvo com sucesso!");
 
-   window.location.reload()
+let formUpdate = document.querySelector("#modal-update form");
 
-}) .catch(err => {
-    console.error("Erro ao enviar formulário:", err); 
-  });
+formUpdate.save().then(json =>{
+
+window.location.reload()
+
+}).catch(err =>{
+
+console.log(err)
+
+});
+
+
+[...document.querySelectorAll('.btn-update')].forEach(btn => {
+
+btn.addEventListener('click', e => {
+  console.log(e)
+
+ let tr = e.composedPath().find(el => {
+ 
+    return (el.tagName.toUpperCase() === 'TR')
+
+    
+  })
+
+  let data = JSON.parse(tr.dataset.row)
+
+  for (let name in data) {
+
+    switch (name) {
+
+      case 'photo':
+        formUpdate.querySelector("img").src = '/'+data[name]
+
+      break;
+      default: 
+      let input = formUpdate.querySelector(`[name=${name}]`);
+      if (input) input.value = data[name];
+
+
+    }
+
+   
+  }
+
+  $('#modal-update').modal('show')
+  
+
+})
 
 })
 
