@@ -26,11 +26,15 @@ module.exports = {
 
   save(fields, files){
     console.log("Arquivos recebidos:", files);
+    console.log("Fields Funcionando!!:", fields);
 
     return new Promise((resolve, reject) =>{
 
-      fields.photo = `images/${path.parse(fields.photo.path).base}`;
-      console.log("Caminho da foto:", fields.photo.path);
+      fields.photo = `images/${path.parse(files.photo[0].filepath).base}`;
+
+     console.log("Fields Funcionando!!:", fields);
+      
+      console.log("Caminho da foto:", files.photo[0].filepath);
 
       conn.query(`
           INSERT INTO tb_menus (title, description, price, photo)
