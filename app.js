@@ -26,6 +26,8 @@ app.use(function (req, res, next) {
 
     form.parse(req, (err, fields, files) => {
       if (err) {
+        console.log("Caminho do arquivo:", files.photo[0].filepath);
+
         console.error("Erro ao processar o formulário:", err);
         return res.status(500).json({ error: "Erro ao processar o formulário", details: err });
       }
