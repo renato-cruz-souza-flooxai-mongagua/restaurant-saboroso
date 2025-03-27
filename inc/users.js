@@ -25,9 +25,10 @@ module.exports = {
                         reject(err)
                     } else {
 
-                        if (!results.length === 0 ){
-                            console.log("NÃO TEM USER")
-                            reject("Usuarios ou senha incorretos")
+                        if (results.length === 0) {
+                            console.log("NÃO TEM USER");
+                            reject("Usuário ou senha incorretos");
+                            return;
                         } else {
                            
                             let row = results[0]
@@ -36,7 +37,7 @@ module.exports = {
                             console.log('password', password)
                             console.log('RESULTS', results)
 
-                            if (row.password !== password[0]){
+                            if (password === password[0]){
                                 console.log("SENHA INCORRETA")
                                 reject("Usuarios ou senha incorretos")
                             } else {
@@ -51,6 +52,95 @@ module.exports = {
 
         })
 
+    },
+
+    getUsers(){
+
+        return new Promise((resolve, reject)=>{
+    
+            conn.query(`
+        
+                SELECT * FROM tb_users ORDER BY name
+                
+                `, (err, results) =>{
+            
+                  if(err) {
+                    reject(err)
+                  }
+                  
+                  resolve(results)
+            
+                }) 
+    
+        })
+    
+      },
+    
+      save(fields, files){
+        // console.log("Arquivos recebidos:", files);
+        // console.log("Fields Funcionando!!:", fields);
+    
+        return new Promise((resolve, reject) =>{
+    
+    
+          let query, queryPhoto = '', params = [
+            fields.name,
+            fields.email
+           
+        ];
+    
+
+    
+            if (parseInt(fields.id) > 0) {
+    
+                params.push(fields.id)            
+              
+                query = `
+            UPDATE tb_users
+            SET name = ?,
+                email = ?
+            WHERE id = ?
+        `;
+            } else {
+
+                query = `
+                    INSERT INTO tb_users (name, email, password)
+                    VALUES(?, ?, ?)
+                `;
+                params.push(fields.password)
+            }
+    
+    
+            conn.query(query, params, (err, results) => {
+                if (err) {
+                    reject(err);
+                    console.error("Erro ao inserir ou atualizar no banco:", err);
+                } else {
+                    resolve(results);
+                }
+            });
+        });
+    },
+    
+    delete(id){
+    
+        return new Promise((resolve, reject) =>{
+          
+            conn.query(`
+                DELETE FROM tb_users WHERE id = ?
+                `, [
+                    id
+                ], (err, results)=>{
+    
+                   if (err) {
+                        reject(err)
+                   } else {
+                        resolve(results)
+                   }
+    
+                })
+        })
+    
     }
     
 }

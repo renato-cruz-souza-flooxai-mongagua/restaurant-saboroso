@@ -60,7 +60,7 @@ module.exports = {
     `;
         } else {
 
-            if (files.photo?.[0]?.filepath) {
+            if (!files.photo?.[0]?.filepath) {
                return reject('Envie a foto do prato!')
             }
 
