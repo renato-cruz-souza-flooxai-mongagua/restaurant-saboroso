@@ -43,8 +43,8 @@ class HcodeGrid {
         this.options = Object.assign({}, {
             formCreate: '#modal-create form',
             formUpdate: '#modal-update form',
-            btnUpdate: '.btn-update',
-            btnDelete: '.btn-delete',
+            btnUpdate: 'btn-update',
+            btnDelete: 'btn-delete',
             onUpdateLoad: (formUpdate, name, data) =>{
              
                 let input =  formUpdate.querySelector("[name="+name+"]");
@@ -55,6 +55,7 @@ class HcodeGrid {
 
         }, configs);
 
+        this.rows =[...document.querySelectorAll('table tbody tr')];
         this.initForms()
         this.initButtons()
 
@@ -67,28 +68,25 @@ class HcodeGrid {
 
         this.formCreate = document.querySelector(this.options.formCreate);
 
-        this.formCreate.save().then(json => {
-
-            this.fireEvent("afterFormCreate");
-
-        }).catch(err => {
-
-            this.fireEvent("afterFormCreateError")
-
-        })
+        this.formCreate.save({
+            success:()=>{
+                this.fireEvent("afterFormCreate")
+            },
+            failure:()=>{
+                this.fireEvent("afterFormCreateError")
+            }
+        });
 
         this.formUpdate = document.querySelector(this.options.formUpdate);
 
-        this.formUpdate.save().then(json => {
-
-            this.fireEvent("afterFormUpdate")
-
-        }).catch(err => {
-
-            this.fireEvent("afterFormUpdateError")
-
-
-        });
+        this.formUpdate.save({
+            success:()=>{
+                this.fireEvent("afterFormUpdate")
+            },
+            failure:()=> {
+                this.fireEvent("afterFormUpdateError")
+            }
+        })
     }
 
     fireEvent(name, args) {
@@ -108,57 +106,77 @@ class HcodeGrid {
         return JSON.parse(tr.dataset.row)
     }
 
+    btnUpdateClick(e){
+
+        this.fireEvent('beforeUpdateClick', [e])
+
+        let data = this.getTrData(e)
+
+
+        for (let name in data) {
+
+            this.options.onUpdateLoad(this.formUpdate, name, data);
+
+
+        }
+
+
+        this.fireEvent('afterUpdateClick', [e])
+
+    }
+
+    btnDeleteClick(e){
+
+        this.fireEvent("beforeDeleteClick");
+
+        let data = this.getTrData(e)
+
+        if (confirm(eval('`' + this.options.deleteMsg + '`'))) {
+
+            fetch(eval('`' + this.options.deleteUrl + '`'), {
+                method: 'DELETE'
+            })
+                .then(response => response.json())
+                .then(json => {
+
+                    this.fireEvent("afterDeleteClick");
+
+                })
+        
+            }
+
+    }
+
     initButtons() {
 
+        this.rows.forEach(row => {
 
-        [...document.querySelectorAll(this.options.btnUpdate)].forEach(btn => {
+            [...row.querySelectorAll('.btn')].forEach(btn =>{
 
             btn.addEventListener('click', e => {
 
-                this.fireEvent('beforeUpdateClick', [e])
 
-                let data = this.getTrData(e)
+                if (e.target.classList.contains(this.options.btnUpdate)) {
 
+                    this.btnUpdateClick(e)
 
-                for (let name in data) {
+                } else if (e.target.classList.contains(this.options.btnDelete)) {
 
-                    this.options.onUpdateLoad(this.formUpdate, name, data);
+                    this.btnDeleteClick(e)
 
+                } else {
+
+                    this.fireEvent('buttonClick', [e.target, this.getTrData(e), e])
 
                 }
-
-
-                this.fireEvent('afterUpdateClick', [e])
-
-
-            })
-
-        });
-
-        [...document.querySelectorAll(this.options.btnDelete)].forEach(btn => {
-            btn.addEventListener('click', e => {
-
-                this.fireEvent("beforeDeleteClick");
-
-                let data = this.getTrData(e)
-
-                if (confirm(eval('`' + this.options.deleteMsg + '`'))) {
-
-                    fetch(eval('`' + this.options.deleteUrl + '`'), {
-                        method: 'DELETE'
-                    })
-                        .then(response => response.json())
-                        .then(json => {
-
-                            this.fireEvent("afterDeleteClick");
-
-                        })
-                    { }
-                }
-
 
             });
+
+          });
         });
+
+
+       
 
     }
 
